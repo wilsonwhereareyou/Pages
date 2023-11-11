@@ -45,8 +45,7 @@ struct PageViewController: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIPageViewController {
         let pageViewController = UIPageViewController(
             transitionStyle: self.transitionStyle,
-            navigationOrientation: self.navigationOrientation
-        )
+            navigationOrientation: self.navigationOrientation)
         pageViewController.dataSource = context.coordinator
         pageViewController.delegate = context.coordinator
         pageViewController.view.backgroundColor = .clear
@@ -68,15 +67,15 @@ struct PageViewController: UIViewControllerRepresentable {
         pageViewController.setViewControllers(
             [controllers[currentPage]],
             direction: currentPage - previousPage > 0 ? .forward : .reverse,
-            animated: true
-        )
+            animated: false)
     }
 
 }
 
 @available(iOS 13.0, *)
 class PagesCoordinator: NSObject, UIPageViewControllerDataSource,
-                             UIPageViewControllerDelegate {
+    UIPageViewControllerDelegate
+{
     var parent: PageViewController
 
     init(_ pageViewController: PageViewController) {
@@ -84,9 +83,10 @@ class PagesCoordinator: NSObject, UIPageViewControllerDataSource,
     }
 
     func pageViewController(
-        _ pageViewController: UIPageViewController,
-        viewControllerBefore viewController: UIViewController
-    ) -> UIViewController? {
+        _: UIPageViewController,
+        viewControllerBefore viewController: UIViewController)
+        -> UIViewController?
+    {
         guard let index = parent.controllers.firstIndex(of: viewController) else {
             return nil
         }
@@ -94,24 +94,29 @@ class PagesCoordinator: NSObject, UIPageViewControllerDataSource,
     }
 
     func pageViewController(
-        _ pageViewController: UIPageViewController,
-        viewControllerAfter viewController: UIViewController
-    ) -> UIViewController? {
+        _: UIPageViewController,
+        viewControllerAfter viewController: UIViewController)
+        -> UIViewController?
+    {
         guard let index = parent.controllers.firstIndex(of: viewController) else {
             return nil
         }
-        return index == parent.controllers.count - 1 ? (self.parent.wrap ? parent.controllers.first : nil) : parent.controllers[index + 1]
+        return index == parent.controllers.count - 1
+            ? (self.parent.wrap ? parent.controllers.first : nil)
+            : parent.controllers[index + 1]
     }
 
     func pageViewController(
         _ pageViewController: UIPageViewController,
-        didFinishAnimating finished: Bool,
-        previousViewControllers: [UIViewController],
-        transitionCompleted completed: Bool
-    ) {
-        if completed,
-        let visibleViewController = pageViewController.viewControllers?.first,
-        let index = parent.controllers.firstIndex(of: visibleViewController) {
+        didFinishAnimating _: Bool,
+        previousViewControllers _: [UIViewController],
+        transitionCompleted completed: Bool)
+    {
+        if
+            completed,
+            let visibleViewController = pageViewController.viewControllers?.first,
+            let index = parent.controllers.firstIndex(of: visibleViewController)
+        {
             parent.currentPage = index
         }
     }
@@ -130,20 +135,28 @@ extension PagesCoordinator: UIScrollViewDelegate {
         }
     }
 
-    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+    func scrollViewWillEndDragging(
+        _ scrollView: UIScrollView,
+        withVelocity _: CGPoint,
+        targetContentOffset _: UnsafeMutablePointer<CGPoint>)
+    {
         scrollViewDidScroll(scrollView)
     }
 
     private func disableHorizontalBounce(_ scrollView: UIScrollView) {
-        if parent.currentPage == 0 && scrollView.contentOffset.x < scrollView.bounds.size.width ||
-           parent.currentPage == self.parent.controllers.count - 1 && scrollView.contentOffset.x > scrollView.bounds.size.width {
+        if
+            parent.currentPage == 0 && scrollView.contentOffset.x < scrollView.bounds.size.width ||
+            parent.currentPage == self.parent.controllers.count - 1 && scrollView.contentOffset.x > scrollView.bounds.size.width
+        {
             scrollView.contentOffset = CGPoint(x: scrollView.bounds.size.width, y: 0)
         }
     }
 
     private func disableVerticalBounce(_ scrollView: UIScrollView) {
-        if parent.currentPage == 0 && scrollView.contentOffset.y < scrollView.bounds.size.height ||
-           parent.currentPage == self.parent.controllers.count - 1 && scrollView.contentOffset.y > scrollView.bounds.size.height {
+        if
+            parent.currentPage == 0 && scrollView.contentOffset.y < scrollView.bounds.size.height ||
+            parent.currentPage == self.parent.controllers.count - 1 && scrollView.contentOffset.y > scrollView.bounds.size.height
+        {
             scrollView.contentOffset = CGPoint(x: 0, y: scrollView.bounds.size.height)
         }
     }
